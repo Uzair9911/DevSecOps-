@@ -35,7 +35,7 @@ docker push ${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${REPO_NAME}:latest
 ```
 
 ## SSH config example ###
-Host udemy-flask
+Host tes-flask
     HostName x.x.x.x
     User ubuntu
     IdentitiesOnly yes

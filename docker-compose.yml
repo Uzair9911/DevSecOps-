@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+    udemy_security_python_app:
+        build:
+            context: .
+        ports:
+          - 5000:5000
+        container_name: "udemy_security_python_app"
+        volumes:
+            - ./api/:/app/api
+            - ./tests/:/app/tests
+        
+

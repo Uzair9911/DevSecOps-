@@ -1,0 +1,54 @@
+SELECT  COUNT(*) AS count, httprequest.clientip
+FROM waf_logs
+WHERE action='BLOCK'
+and to_iso8601(from_unixtime(timestamp / 1000)) >= '2024-02-14T09:00:00.000'
+and to_iso8601(from_unixtime(timestamp / 1000)) <= '2024-02-17T14:00:00.000'
+GROUP BY httprequest.clientip
+having COUNT(*) > 0
+ORDER BY count DESC
+
+====================================================================================================================
+# ALB queries
+
+SELECT COUNT(*) AS count, client_ip FROM alb_logs
+WHERE parse_datetime(time, 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') BETWEEN
+parse_datetime('2024-02-14-09:00:01', 'yyyy-MM-dd-HH:mm:ss')
+AND parse_datetime('2024-02-17-14:00:00', 'yyyy-MM-dd-HH:mm:ss')
+AND domain_name = 'flask.sergiitest.website' AND target_status_code='404'
+GROUP BY client_ip
+
+
+SELECT time, request_url, request_verb, sent_bytes FROM alb_logs
+WHERE parse_datetime(time, 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') BETWEEN
+parse_datetime('2024-02-14-09:00:01', 'yyyy-MM-dd-HH:mm:ss')
+AND parse_datetime('2024-02-17-14:00:00', 'yyyy-MM-dd-HH:mm:ss')
+AND domain_name = 'flask.sergiitest.website'
+AND client_ip IN ('213.192.68.53', '222.209.147.146')
+AND target_status_code='200'
+AND request_url not like '%.js%' AND request_url not like '%.css%' AND request_url not like '%.woff%'
+AND request_url not like '%.png%' AND request_url not like '%.jpg%' AND request_url not like '%.jpeg%'
+AND request_url not like '%.svg%'
+
+
+====================================================================================================================
+
+
+# CloudFront queries
+
+====================================================================================================================
+SELECT COUNT(request_ip) AS count, request_ip
+FROM "cloudfront"."cloudfront_logs"
+WHERE parse_datetime(concat(concat(format_datetime(date, 'yyyy-MM-dd'), '-'), time), 'yyyy-MM-dd-HH:mm:ss')
+BETWEEN parse_datetime('2024-01-05-17:00:01', 'yyyy-MM-dd-HH:mm:ss')
+AND parse_datetime('2024-01-05-18:00:00', 'yyyy-MM-dd-HH:mm:ss')
+AND status=404
+GROUP BY request_ip
+HAVING COUNT(request_ip) > 50
+ORDER BY count DESC
+
+SELECT uri, method, query_string FROM "cloudfront"."cloudfront_logs" WHERE  date >= CAST('2024-02-27' AS DATE)
+AND request_ip='193.222.96.6' AND status=200
+AND uri not like '%.js%' AND uri not like '%.css%' AND uri not like '%.woff%'
+AND uri not like '%.png%' AND uri not like '%.jpg%' AND uri not like '%.jpeg%' AND uri not like '%.svg%'
+
+====================================================================================================================

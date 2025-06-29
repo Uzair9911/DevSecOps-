@@ -1,0 +1,81 @@
+SELECT * FROM waf_logs where
+from_unixtime(timestamp/1000) >= CAST('2024-02-12' AS DATE)
+limit 1
+
+SELECT *
+FROM waf_logs CROSS JOIN UNNEST(rulegrouplist) as r(i) where i.terminatingrule.action = 'BLOCK'
+and to_iso8601(from_unixtime(timestamp / 1000)) >= '2024-02-11T15:00:31.000'
+
+SELECT i, httprequest.clientip, httprequest.uri, httprequest.args
+FROM waf_logs CROSS JOIN UNNEST(rulegrouplist) as r(i) where i.terminatingrule.action = 'BLOCK'
+and to_iso8601(from_unixtime(timestamp / 1000)) >= '2024-02-11T15:00:31.000'
+
+SELECT i, httprequest.clientip, httprequest.uri, httprequest.args
+FROM waf_logs CROSS JOIN UNNEST(rulegrouplist) as r(i) where i.terminatingrule.action = 'BLOCK'
+and to_iso8601(from_unixtime(timestamp / 1000)) >= '2024-02-11T15:00:31.000'
+and i.rulegroupid='AWS#AWSManagedRulesLinuxRuleSet#Version_2.2'
+and (i.terminatingrule.ruleid = 'LFI_HEADER' or i.terminatingrule.ruleid = 'LFI_URIPATH' or i.terminatingrule.ruleid = 'LFI_QUERYSTRING')
+
+SELECT to_iso8601(from_unixtime(timestamp / 1000)), httprequest.clientip, httprequest.uri, httprequest.args
+FROM waf_logs
+WHERE action='BLOCK'
+and to_iso8601(from_unixtime(timestamp / 1000)) >= '2024-02-16T09:00:31.000'
+and to_iso8601(from_unixtime(timestamp / 1000)) <= '2024-02-16T11:00:31.000'
+
+SELECT to_iso8601(from_unixtime(timestamp / 1000)), httprequest.clientip, httprequest.uri, httprequest.args
+FROM waf_logs
+WHERE action='BLOCK'
+and to_iso8601(from_unixtime(timestamp / 1000)) >= '2024-02-16T09:00:31.000'
+and to_iso8601(from_unixtime(timestamp / 1000)) <= '2024-02-16T11:00:31.000'
+
+SELECT *
+FROM waf_logs CROSS JOIN UNNEST(rulegrouplist) as r(i)
+WHERE action='BLOCK'
+and to_iso8601(from_unixtime(timestamp / 1000)) >= '2024-02-16T09:00:31.000'
+and to_iso8601(from_unixtime(timestamp / 1000)) <= '2024-02-16T11:00:31.000'
+and terminatingruleid='AWSManagedRulesSQLiRuleSet' and i.terminatingrule.action = 'BLOCK'
+and i.terminatingrule.ruleid = 'SQLi_URIPATH'
+
+SELECT COUNT(*) AS count, httprequest.clientip
+FROM waf_logs
+WHERE action='BLOCK'
+and to_iso8601(from_unixtime(timestamp / 1000)) >= '2024-02-16T09:00:31.000'
+and to_iso8601(from_unixtime(timestamp / 1000)) <= '2024-02-16T16:00:31.000'
+GROUP BY httprequest.clientip
+ORDER BY count DESC
+LIMIT 100;
+
+SELECT * FROM alb_logs where parse_datetime(time, 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') BETWEEN
+parse_datetime('2024-02-16-00:00:01', 'yyyy-MM-dd-HH:mm:ss')
+AND parse_datetime('2024-02-16-23:59:59', 'yyyy-MM-dd-HH:mm:ss')
+
+SELECT from_unixtime(floor(to_unixtime(from_iso8601_timestamp(time)) / 300) * 300),	client_ip, COUNT(client_ip) AS count
+FROM alb_logs
+WHERE domain_name = 'flask.sergiitest.website'
+	AND parse_datetime(time, 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') BETWEEN
+    parse_datetime('2024-02-16-00:00:01', 'yyyy-MM-dd-HH:mm:ss')  AND parse_datetime('2024-02-16-23:59:59', 'yyyy-MM-dd-HH:mm:ss')
+GROUP BY from_unixtime(floor(to_unixtime(from_iso8601_timestamp(time)) / 300) * 300), client_ip
+having COUNT(client_ip) > 1
+ORDER BY count DESC
+
+SELECT from_unixtime(floor(to_unixtime(from_iso8601_timestamp(time)) / 300) * 300),	client_ip, COUNT(client_ip) AS count
+FROM alb_logs
+WHERE domain_name = 'flask.sergiitest.website' and request_url like 'https://flask.sergiitest.website:443/test%'
+	AND parse_datetime(time, 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') BETWEEN
+    parse_datetime('2024-02-16-00:00:01', 'yyyy-MM-dd-HH:mm:ss')  AND parse_datetime('2024-02-16-23:59:59', 'yyyy-MM-dd-HH:mm:ss')
+GROUP BY from_unixtime(floor(to_unixtime(from_iso8601_timestamp(time)) / 300) * 300), client_ip
+having COUNT(client_ip) > 0
+ORDER BY count DESC
+
+SELECT distinct httprequest.clientip
+FROM waf_logs
+WHERE action='BLOCK'
+and to_iso8601(from_unixtime(timestamp / 1000)) >= '2024-02-20T09:00:31.000'
+and to_iso8601(from_unixtime(timestamp / 1000)) <= '2024-02-20T16:00:31.000'
+and terminatingruleid='security-web-waf-dev-rate-subdomain-flask'
+
+SELECT * FROM alb_logs where parse_datetime(time, 'yyyy-MM-dd''T''HH:mm:ss.SSSSSS''Z') BETWEEN
+parse_datetime('2024-02-16-00:00:01', 'yyyy-MM-dd-HH:mm:ss')
+AND parse_datetime('2024-02-16-23:59:59', 'yyyy-MM-dd-HH:mm:ss')
+AND domain_name = 'flask.sergiitest.website'
+AND client_ip IN ('213.192.68.53')

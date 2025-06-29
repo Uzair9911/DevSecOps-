@@ -1,0 +1,38 @@
+[
+   {
+      "rulegroupid=AWS#AWSManagedRulesAmazonIpReputationList",
+      "terminatingrule=null",
+      "nonterminatingmatchingrules="[
+
+      ],
+      "excludedrules=null"
+   },
+   {
+      rulegroupid=AWS#AWSManagedRulesCommonRuleSet#Version_1.10,
+      "terminatingrule=null",
+      "nonterminatingmatchingrules="[
+
+      ],
+      "excludedrules=null"
+   },
+   {
+      rulegroupid=AWS#AWSManagedRulesLinuxRuleSet#Version_2.2,
+      "terminatingrule="{
+         "ruleid=LFI_HEADER",
+         "action=BLOCK",
+         "rulematchdetails=null"
+      },
+      "nonterminatingmatchingrules="[
+
+      ],
+      "excludedrules=null"
+   },
+   {
+      rulegroupid=AWS#AWSManagedRulesSQLiRuleSet#Version_1.1,
+      "terminatingrule=null",
+      "nonterminatingmatchingrules="[
+
+      ],
+      "excludedrules=null"
+   }
+]

@@ -1,0 +1,7 @@
+Flask==2.3.3
+flask-restful==0.3.10
+flask_log_request_id
+flake8==6.1.0
+pytest==7.4.2
+mock==5.1.0
+gunicorn==20.1.0

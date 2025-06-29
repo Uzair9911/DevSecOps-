@@ -1,0 +1,206 @@
+# FOR WAF LOGS
+
+CREATE EXTERNAL TABLE `waf_logs`(
+  `timestamp` bigint,
+  `formatversion` int,
+  `webaclid` string,
+  `terminatingruleid` string,
+  `terminatingruletype` string,
+  `action` string,
+  `terminatingrulematchdetails` array <
+                                    struct <
+                                        conditiontype: string,
+                                        sensitivitylevel: string,
+                                        location: string,
+                                        matcheddata: array < string >
+                                          >
+                                     >,
+  `httpsourcename` string,
+  `httpsourceid` string,
+  `rulegrouplist` array <
+                      struct <
+                          rulegroupid: string,
+                          terminatingrule: struct <
+                                              ruleid: string,
+                                              action: string,
+                                              rulematchdetails: array <
+                                                                   struct <
+                                                                       conditiontype: string,
+                                                                       sensitivitylevel: string,
+                                                                       location: string,
+                                                                       matcheddata: array < string >
+                                                                          >
+                                                                    >
+                                                >,
+                          nonterminatingmatchingrules: array <
+                                                              struct <
+                                                                  ruleid: string,
+                                                                  action: string,
+                                                                  overriddenaction: string,
+                                                                  rulematchdetails: array <
+                                                                                       struct <
+                                                                                           conditiontype: string,
+                                                                                           sensitivitylevel: string,
+                                                                                           location: string,
+                                                                                           matcheddata: array < string >
+                                                                                              >
+                                                                   >,
+                                                                  challengeresponse: struct <
+                                                                            responsecode: string,
+                                                                            solvetimestamp: string
+                                                                              >,
+                                                                  captcharesponse: struct <
+                                                                            responsecode: string,
+                                                                            solvetimestamp: string
+                                                                              >
+                                                                    >
+                                                             >,
+                          excludedrules: string
+                            >
+                       >,
+`ratebasedrulelist` array <
+                         struct <
+                             ratebasedruleid: string,
+                             limitkey: string,
+                             maxrateallowed: int
+                               >
+                          >,
+  `nonterminatingmatchingrules` array <
+                                    struct <
+                                        ruleid: string,
+                                        action: string,
+                                        rulematchdetails: array <
+                                                             struct <
+                                                                 conditiontype: string,
+                                                                 sensitivitylevel: string,
+                                                                 location: string,
+                                                                 matcheddata: array < string >
+                                                                    >
+                                                             >,
+                                        challengeresponse: struct <
+                                                            responsecode: string,
+                                                            solvetimestamp: string
+                                                             >,
+                                        captcharesponse: struct <
+                                                            responsecode: string,
+                                                            solvetimestamp: string
+                                                             >
+                                          >
+                                     >,
+  `requestheadersinserted` array <
+                                struct <
+                                    name: string,
+                                    value: string
+                                      >
+                                 >,
+  `responsecodesent` string,
+  `httprequest` struct <
+                    clientip: string,
+                    country: string,
+                    headers: array <
+                                struct <
+                                    name: string,
+                                    value: string
+                                      >
+                                 >,
+                    uri: string,
+                    args: string,
+                    httpversion: string,
+                    httpmethod: string,
+                    requestid: string
+                      >,
+  `labels` array <
+               struct <
+                   name: string
+                     >
+                >,
+  `captcharesponse` struct <
+                        responsecode: string,
+                        solvetimestamp: string,
+                        failureReason: string
+                          >,
+  `challengeresponse` struct <
+                        responsecode: string,
+                        solvetimestamp: string,
+                        failureReason: string
+                        >,
+  `ja3Fingerprint` string
+)
+PARTITIONED BY (
+`region` string,
+`date` string)
+ROW FORMAT SERDE
+  'org.openx.data.jsonserde.JsonSerDe'
+STORED AS INPUTFORMAT
+  'org.apache.hadoop.mapred.TextInputFormat'
+OUTPUTFORMAT
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  's3://aws-waf-logs-security-web-waf-dev-apps/AWSLogs/{put_your_aws_account_id_here}/WAFLogs/{put_your_region_here}/security-web-waf-dev-webacl-apps/'
+TBLPROPERTIES(
+ 'projection.enabled' = 'true',
+ 'projection.region.type' = 'enum',
+ 'projection.region.values' = 'us-east-1,us-west-2,eu-central-1,eu-west-1',
+ 'projection.date.type' = 'date',
+ 'projection.date.range' = '2024/02/10,NOW',
+ 'projection.date.format' = 'yyyy/MM/dd',
+ 'projection.date.interval' = '1',
+ 'projection.date.interval.unit' = 'DAYS',
+ 'storage.location.template' = 's3://aws-waf-logs-security-web-waf-dev-apps/AWSLogs/{put_your_aws_account_id_here}/WAFLogs/${region}/security-web-waf-dev-webacl-apps/${date}/')
+
+# FOR ALB LOGS
+CREATE EXTERNAL TABLE IF NOT EXISTS alb_logs (
+            type string,
+            time string,
+            elb string,
+            client_ip string,
+            client_port int,
+            target_ip string,
+            target_port int,
+            request_processing_time double,
+            target_processing_time double,
+            response_processing_time double,
+            elb_status_code int,
+            target_status_code string,
+            received_bytes bigint,
+            sent_bytes bigint,
+            request_verb string,
+            request_url string,
+            request_proto string,
+            user_agent string,
+            ssl_cipher string,
+            ssl_protocol string,
+            target_group_arn string,
+            trace_id string,
+            domain_name string,
+            chosen_cert_arn string,
+            matched_rule_priority string,
+            request_creation_time string,
+            actions_executed string,
+            redirect_url string,
+            lambda_error_reason string,
+            target_port_list string,
+            target_status_code_list string,
+            classification string,
+            classification_reason string
+            )
+            PARTITIONED BY
+            (
+             day STRING
+            )
+            ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
+            WITH SERDEPROPERTIES (
+            'serialization.format' = '1',
+            'input.regex' =
+        '([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*):([0-9]*) ([^ ]*)[:-]([0-9]*) ([-.0-9]*) ([-.0-9]*) ([-.0-9]*) (|[-0-9]*) (-|[-0-9]*) ([-0-9]*) ([-0-9]*) \"([^ ]*) (.*) (- |[^ ]*)\" \"([^\"]*)\" ([A-Z0-9-_]+) ([A-Za-z0-9.-]*) ([^ ]*) \"([^\"]*)\" \"([^\"]*)\" \"([^\"]*)\" ([-.0-9]*) ([^ ]*) \"([^\"]*)\" \"([^\"]*)\" \"([^ ]*)\" \"([^\s]+?)\" \"([^\s]+)\" \"([^ ]*)\" \"([^ ]*)\"')
+            LOCATION 's3://dev-lb-flask-logs/dev-flask/AWSLogs/{put_your_aws_account_id_here}/elasticloadbalancing/{put_your_region_here}/'
+            TBLPROPERTIES
+            (
+             "projection.enabled" = "true",
+             "projection.day.type" = "date",
+             "projection.day.range" = "2022/01/01,NOW",
+             "projection.day.format" = "yyyy/MM/dd",
+             "projection.day.interval" = "1",
+             "projection.day.interval.unit" = "DAYS",
+             "storage.location.template" = "s3://dev-lb-flask-logs/dev-flask/AWSLogs/{put_your_aws_account_id_here}/elasticloadbalancing/{put_your_region_here}/${day}"
+            )
